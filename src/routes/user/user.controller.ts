@@ -23,7 +23,6 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  @UsePipes(new ValidationPipe())
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createUserDto: CreateUserDto): User {
     return this.userService.create(createUserDto);
@@ -40,7 +39,6 @@ export class UserController {
   }
 
   @Put(':id')
-  @UsePipes(new ValidationPipe())
   update(
     @Param('id', ParseUUIDPipe) id: UUID,
     @Body() updatePasswordDto: UpdatePasswordDto,
