@@ -1,4 +1,4 @@
-import { IsNumber, IsString, IsUUID, ValidateIf } from 'class-validator';
+import { IsNumber, IsString, IsUUID } from 'class-validator';
 import { PartialType } from '@nestjs/mapped-types';
 
 class UnnecessaryFields {
