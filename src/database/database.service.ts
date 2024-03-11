@@ -5,6 +5,10 @@ import { Album } from 'src/routes/album/entities/album.entity';
 import { CreateArtistDto } from 'src/routes/artist/dto/create-artist.dto';
 import { UpdateArtistDto } from 'src/routes/artist/dto/update-artist.dto';
 import { Artist } from 'src/routes/artist/entities/artist.entity';
+import {
+  Favorites,
+  FavoritesResponse,
+} from 'src/routes/favs/entities/fav.entity';
 import { CreateTrackDto } from 'src/routes/track/dto/create-track.dto';
 import { UpdateTrackDto } from 'src/routes/track/dto/update-track.dto';
 import { Track } from 'src/routes/track/entities/track.entity';
@@ -20,6 +24,11 @@ export class DatabaseService {
   private tracks: Track[] = [];
   private artists: Artist[] = [];
   private albums: Album[] = [];
+  private favorites: Favorites = {
+    artists: [],
+    albums: [],
+    tracks: [],
+  };
 
   // Users
   public getAllUsers(): User[] {
@@ -165,5 +174,44 @@ export class DatabaseService {
 
   public deleteAlbum(id: UUID) {
     this.albums = this.albums.filter((album) => album.id !== id);
+  }
+
+  // Favorites
+  public getAllFavorites(): FavoritesResponse {
+    return {
+      artists: this.favorites.artists.map((id) => this.getArtistById(id)),
+      albums: this.favorites.albums.map((id) => this.getAlbumById(id)),
+      tracks: this.favorites.tracks.map((id) => this.getTrackById(id)),
+    };
+  }
+
+  public addTrackToFavorites(id: UUID) {
+    this.favorites.tracks.push(id);
+  }
+
+  public addAlbumToFavorites(id: UUID) {
+    this.favorites.albums.push(id);
+  }
+
+  public addArtistToFavorites(id: UUID) {
+    this.favorites.artists.push(id);
+  }
+
+  public removeTrackFromFavorites(id: UUID) {
+    this.favorites.tracks = this.favorites.tracks.filter(
+      (trackId) => trackId !== id,
+    );
+  }
+
+  public removeAlbumFromFavorites(id: UUID) {
+    this.favorites.albums = this.favorites.albums.filter(
+      (albumId) => albumId !== id,
+    );
+  }
+
+  public removeArtistFromFavorites(id: UUID) {
+    this.favorites.artists = this.favorites.artists.filter(
+      (artistId) => artistId !== id,
+    );
   }
 }
