@@ -1,72 +1,39 @@
 # Home Library Service
 
-## Prerequisites
-
-- Git - [Download & Install Git](https://git-scm.com/downloads).
-- Node.js - [Download & Install Node.js](https://nodejs.org/en/download/) and the npm package manager.
-
 ## Downloading
+- Download application by zip or by command
+  ```
+  git clone git@github.com:maxsimusprime/nodejs2024Q1-service.git
+  ```
+- Check develop branch by command
+  ```
+  git checkout develop
+  ```
 
-```
-git clone {repository URL}
-```
 
-## Installing NPM modules
+## Installing
+- Install dependencies
+  ```
+  npm install
+  ```
+- create .env file in root directory according to .env.example with 4000 port (api.yaml used 4000 port)
 
-```
-npm install
-```
+## Using application
+- Start application server by command
+  ```
+  npm start
+  ```
+- In order to send command you can use tools like **Insomnia** or **Postman**
+- Just import api.yaml schema in that tools and you can use cozy UI interface
+- Screenshot instruction (Insomnia):
 
-## Running application
-
-```
-npm start
-```
-
-After starting the app on port (4000 as default) you can open
-in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
-For more information about OpenAPI/Swagger please visit https://swagger.io/.
+  ![](https://i.ibb.co/2W8FGY0/image.png)
+  
+  ![](https://i.ibb.co/SdYDKF5/image.png)
 
 ## Testing
+- To run all tests without authorization
 
-After application running open new terminal and enter:
-
-To run all tests without authorization
-
-```
-npm run test
-```
-
-To run only one of all test suites
-
-```
-npm run test -- <path to suite>
-```
-
-To run all test with authorization
-
-```
-npm run test:auth
-```
-
-To run only specific test suite with authorization
-
-```
-npm run test:auth -- <path to suite>
-```
-
-### Auto-fix and format
-
-```
-npm run lint
-```
-
-```
-npm run format
-```
-
-### Debugging in VSCode
-
-Press <kbd>F5</kbd> to debug.
-
-For more information, visit: https://code.visualstudio.com/docs/editor/debugging
+  ```
+  npm run test
+  ```
