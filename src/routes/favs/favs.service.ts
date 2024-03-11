@@ -25,7 +25,7 @@ export class FavsService {
   }
 
   addAlbum(id: UUID) {
-    const album = this.databaseService.getTrackById(id);
+    const album = this.databaseService.getAlbumById(id);
     if (!album) throw new UnprocessableEntityException();
     this.databaseService.addAlbumToFavorites(id);
     return {

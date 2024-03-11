@@ -8,7 +8,7 @@ class UnnecessaryFields {
 
 class UnnecessaryDto extends PartialType(UnnecessaryFields) {}
 
-export class CreateAlbumDto {
+export class CreateAlbumDto extends UnnecessaryDto {
   @IsString()
   readonly name: string;
 

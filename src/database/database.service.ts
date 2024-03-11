@@ -44,7 +44,7 @@ export class DatabaseService {
     const user: User = {
       ...dto,
       id: uuidv4(),
-      version: 0,
+      version: 1,
       createdAt: timeNow,
       updatedAt: timeNow,
     };
@@ -54,8 +54,9 @@ export class DatabaseService {
 
   public updateUser(id: UUID, dto: UpdatePasswordDto) {
     const user = this.users.find((user) => user.id === id);
-    const updatedUser = {
+    const updatedUser: User = {
       ...user,
+      version: user.version + 1,
       password: dto.newPassword,
       updatedAt: Date.now(),
     };
