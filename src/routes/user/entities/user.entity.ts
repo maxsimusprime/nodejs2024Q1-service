@@ -6,3 +6,11 @@ export class User {
   createdAt: number;
   updatedAt: number;
 }
+
+export interface UserResponse {
+  id: string;
+  login: string;
+  version: number;
+  createdAt: number;
+  updatedAt: number;
+}

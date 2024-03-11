@@ -7,8 +7,6 @@ import {
   Delete,
   ParseUUIDPipe,
   Put,
-  UsePipes,
-  ValidationPipe,
   HttpStatus,
   HttpCode,
 } from '@nestjs/common';
@@ -16,7 +14,7 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UUID } from 'src/types/general';
-import { User } from './entities/user.entity';
+import { User, UserResponse } from './entities/user.entity';
 
 @Controller('user')
 export class UserController {
@@ -24,17 +22,17 @@ export class UserController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createUserDto: CreateUserDto): User {
+  create(@Body() createUserDto: CreateUserDto): UserResponse {
     return this.userService.create(createUserDto);
   }
 
   @Get()
-  findAll(): User[] {
+  findAll(): UserResponse[] {
     return this.userService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: UUID): User {
+  findOne(@Param('id', ParseUUIDPipe) id: UUID): UserResponse {
     return this.userService.findOne(id);
   }
 
@@ -42,7 +40,7 @@ export class UserController {
   update(
     @Param('id', ParseUUIDPipe) id: UUID,
     @Body() updatePasswordDto: UpdatePasswordDto,
-  ) {
+  ): UserResponse {
     return this.userService.update(id, updatePasswordDto);
   }
 
