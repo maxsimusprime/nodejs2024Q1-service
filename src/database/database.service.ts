@@ -132,4 +132,38 @@ export class DatabaseService {
   public deleteArtist(id: UUID) {
     this.artists = this.artists.filter((artist) => artist.id !== id);
   }
+
+  //Album
+  public getAllAlbums(): Album[] {
+    return this.albums;
+  }
+
+  public getAlbumById(id: UUID): Album {
+    return this.albums.find((album) => album.id === id);
+  }
+
+  public createAlbum(dto: CreateAlbumDto): Album {
+    const newAlbum: Album = {
+      id: uuidv4(),
+      ...dto,
+    };
+    this.albums.push(newAlbum);
+    return newAlbum;
+  }
+
+  public updateAlbum(id: UUID, dto: UpdateAlbumDto): Album {
+    const album = this.getAlbumById(id);
+    const updatedAlbum = {
+      ...album,
+      ...dto,
+    };
+    this.albums = this.albums.map((album) =>
+      album.id !== id ? album : updatedAlbum,
+    );
+    return updatedAlbum;
+  }
+
+  public deleteAlbum(id: UUID) {
+    this.albums = this.albums.filter((album) => album.id !== id);
+  }
 }
