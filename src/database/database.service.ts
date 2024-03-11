@@ -106,6 +106,7 @@ export class DatabaseService {
 
   public deleteTrack(id: UUID) {
     this.tracks = this.tracks.filter((track) => track.id !== id);
+    this.removeTrackFromFavorites(id);
   }
 
   // Artist
@@ -140,6 +141,23 @@ export class DatabaseService {
 
   public deleteArtist(id: UUID) {
     this.artists = this.artists.filter((artist) => artist.id !== id);
+    this.tracks = this.tracks.map((track) =>
+      track.artistId !== id
+        ? track
+        : {
+            ...track,
+            artistId: null,
+          },
+    );
+    this.albums = this.albums.map((album) =>
+      album.artistId !== id
+        ? album
+        : {
+            ...album,
+            artistId: null,
+          },
+    );
+    this.removeArtistFromFavorites(id);
   }
 
   //Album
@@ -174,6 +192,15 @@ export class DatabaseService {
 
   public deleteAlbum(id: UUID) {
     this.albums = this.albums.filter((album) => album.id !== id);
+    this.tracks = this.tracks.map((track) =>
+      track.albumId !== id
+        ? track
+        : {
+            ...track,
+            albumId: null,
+          },
+    );
+    this.removeAlbumFromFavorites(id);
   }
 
   // Favorites
