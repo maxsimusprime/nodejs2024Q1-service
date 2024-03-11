@@ -1,4 +1,10 @@
 import { Injectable } from '@nestjs/common';
+import { CreateAlbumDto } from 'src/routes/album/dto/create-album.dto';
+import { UpdateAlbumDto } from 'src/routes/album/dto/update-album.dto';
+import { Album } from 'src/routes/album/entities/album.entity';
+import { CreateArtistDto } from 'src/routes/artist/dto/create-artist.dto';
+import { UpdateArtistDto } from 'src/routes/artist/dto/update-artist.dto';
+import { Artist } from 'src/routes/artist/entities/artist.entity';
 import { CreateTrackDto } from 'src/routes/track/dto/create-track.dto';
 import { UpdateTrackDto } from 'src/routes/track/dto/update-track.dto';
 import { Track } from 'src/routes/track/entities/track.entity';
@@ -12,6 +18,8 @@ import { v4 as uuidv4 } from 'uuid';
 export class DatabaseService {
   private users: User[] = [];
   private tracks: Track[] = [];
+  private artists: Artist[] = [];
+  private albums: Album[] = [];
 
   // Users
   public getAllUsers(): User[] {
@@ -89,5 +97,39 @@ export class DatabaseService {
 
   public deleteTrack(id: UUID) {
     this.tracks = this.tracks.filter((track) => track.id !== id);
+  }
+
+  // Artist
+  public getAllArtists(): Artist[] {
+    return this.artists;
+  }
+
+  public getArtistById(id: UUID): Artist {
+    return this.artists.find((artist) => artist.id === id);
+  }
+
+  public createArtist(dto: CreateArtistDto): Artist {
+    const artist = {
+      id: uuidv4(),
+      ...dto,
+    };
+    this.artists.push(artist);
+    return artist;
+  }
+
+  public updateArtist(id: UUID, dto: UpdateArtistDto): Artist {
+    const artist = this.getArtistById(id);
+    const updatedArtist = {
+      ...artist,
+      ...dto,
+    };
+    this.artists = this.artists.map((artist) =>
+      artist.id !== id ? artist : updatedArtist,
+    );
+    return updatedArtist;
+  }
+
+  public deleteArtist(id: UUID) {
+    this.artists = this.artists.filter((artist) => artist.id !== id);
   }
 }
