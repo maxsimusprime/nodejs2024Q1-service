@@ -1,0 +1,18 @@
+version: '3.9'
+
+services:
+
+  db:
+    image: postgres
+    restart: always
+    shm_size: 128mb
+    ports:
+      - ${POSTGRESQL_PORT}:${POSTGRESQL_PORT}
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRESQL_PASSWORD}
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - ${ADMINER_PORT}:${ADMINER_PORT}
