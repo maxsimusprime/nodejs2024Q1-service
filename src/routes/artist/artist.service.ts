@@ -9,27 +9,27 @@ import { DatabaseService } from 'src/database/database.service';
 export class ArtistService {
   constructor(private readonly databaseService: DatabaseService) {}
 
-  create(createArtistDto: CreateArtistDto): Artist {
-    return this.databaseService.createArtist(createArtistDto);
+  async create(createArtistDto: CreateArtistDto): Promise<Artist> {
+    return await this.databaseService.createArtist(createArtistDto);
   }
 
-  findAll(): Artist[] {
-    return this.databaseService.getAllArtists();
+  async findAll(): Promise<Artist[]> {
+    return await this.databaseService.getAllArtists();
   }
 
-  findOne(id: UUID): Artist {
-    const artist = this.databaseService.getArtistById(id);
+  async findOne(id: UUID): Promise<Artist> {
+    const artist = await this.databaseService.getArtistById(id);
     if (!artist) throw new NotFoundException();
     return artist;
   }
 
-  update(id: UUID, updateArtistDto: UpdateArtistDto): Artist {
-    this.findOne(id);
-    return this.databaseService.updateArtist(id, updateArtistDto);
+  async update(id: UUID, updateArtistDto: UpdateArtistDto): Promise<Artist> {
+    await this.findOne(id);
+    return await this.databaseService.updateArtist(id, updateArtistDto);
   }
 
-  remove(id: UUID) {
-    const artist = this.findOne(id);
+  async remove(id: UUID) {
+    const artist = await this.findOne(id);
     if (artist) this.databaseService.deleteArtist(id);
   }
 }

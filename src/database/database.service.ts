@@ -106,54 +106,41 @@ export class DatabaseService {
   }
 
   // Artist
-  public getAllArtists(): Artist[] {
-    return this.artists;
+  public async getAllArtists(): Promise<Artist[]> {
+    return await this.prisma.artist.findMany();
   }
 
-  public getArtistById(id: UUID): Artist {
-    return this.artists.find((artist) => artist.id === id);
+  public async getArtistById(id: UUID): Promise<Artist> {
+    return await this.prisma.artist.findUnique({
+      where: { id },
+    });
   }
 
-  public createArtist(dto: CreateArtistDto): Artist {
-    const artist = {
-      id: uuidv4(),
-      ...dto,
-    };
-    this.artists.push(artist);
-    return artist;
+  public async createArtist(dto: CreateArtistDto): Promise<Artist> {
+    return this.prisma.artist.create({
+      data: {
+        ...dto,
+      },
+    });
   }
 
-  public updateArtist(id: UUID, dto: UpdateArtistDto): Artist {
-    const artist = this.getArtistById(id);
-    const updatedArtist = {
-      ...artist,
-      ...dto,
-    };
-    this.artists = this.artists.map((artist) =>
-      artist.id !== id ? artist : updatedArtist,
-    );
-    return updatedArtist;
+  public async updateArtist(id: UUID, dto: UpdateArtistDto): Promise<Artist> {
+    return this.prisma.artist.update({
+      where: {
+        id,
+      },
+      data: {
+        ...dto,
+      },
+    });
   }
 
-  public deleteArtist(id: UUID) {
-    this.artists = this.artists.filter((artist) => artist.id !== id);
-    this.tracks = this.tracks.map((track) =>
-      track.artistId !== id
-        ? track
-        : {
-            ...track,
-            artistId: null,
-          },
-    );
-    this.albums = this.albums.map((album) =>
-      album.artistId !== id
-        ? album
-        : {
-            ...album,
-            artistId: null,
-          },
-    );
-    this.removeArtistFromFavorites(id);
+  public async deleteArtist(id: UUID): Promise<void> {
+    await this.prisma.artist.delete({
+      where: {
+        id,
+      },
+    });
   }
 
   //Album
@@ -202,7 +189,8 @@ export class DatabaseService {
   // Favorites
   public getAllFavorites(): FavoritesResponse {
     return {
-      artists: this.favorites.artists.map((id) => this.getArtistById(id)),
+      // artists: this.favorites.artists.map((id) => this.getArtistById(id)),
+      artists: [],
       albums: this.favorites.albums.map((id) => this.getAlbumById(id)),
       tracks: this.favorites.tracks.map((id) => this.getTrackById(id)),
     };
