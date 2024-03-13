@@ -13,10 +13,10 @@ import { CreateTrackDto } from 'src/routes/track/dto/create-track.dto';
 import { UpdateTrackDto } from 'src/routes/track/dto/update-track.dto';
 import { Track } from 'src/routes/track/entities/track.entity';
 import { CreateUserDto } from 'src/routes/user/dto/create-user.dto';
-import { UpdatePasswordDto } from 'src/routes/user/dto/update-password.dto';
 import { User } from 'src/routes/user/entities/user.entity';
 import { UUID } from 'src/types/general';
 import { v4 as uuidv4 } from 'uuid';
+import { PrismaClient } from '@prisma/client';
 
 @Injectable()
 export class DatabaseService {
@@ -30,45 +30,40 @@ export class DatabaseService {
     tracks: [],
   };
 
+  private prisma: PrismaClient = new PrismaClient();
+
   // Users
-  public getAllUsers(): User[] {
-    return this.users;
+  public async getAllUsers(): Promise<User[]> {
+    return await this.prisma.user.findMany();
   }
 
-  public getUserById(id: UUID): User {
-    return this.users.find((user) => user.id === id);
+  public async getUserById(id: UUID): Promise<User> {
+    return await this.prisma.user.findUnique({
+      where: { id },
+    });
   }
 
-  public createUser(dto: CreateUserDto): User {
-    const timeNow = Date.now();
-    const user: User = {
-      ...dto,
-      id: uuidv4(),
-      version: 1,
-      createdAt: timeNow,
-      updatedAt: timeNow,
-    };
-    this.users.push(user);
-    return user;
+  public async createUser(dto: CreateUserDto): Promise<User> {
+    return await this.prisma.user.create({
+      data: {
+        ...dto,
+      },
+    });
   }
 
-  public updateUser(id: UUID, dto: UpdatePasswordDto) {
-    const user = this.users.find((user) => user.id === id);
-    const updatedUser: User = {
-      ...user,
-      version: user.version + 1,
-      password: dto.newPassword,
-      updatedAt: Date.now(),
-    };
-
-    this.users = this.users.map((user) =>
-      user.id !== id ? user : updatedUser,
-    );
-    return updatedUser;
+  public async updateUser(id: UUID, password: string): Promise<User> {
+    return await this.prisma.user.update({
+      where: { id },
+      data: {
+        password,
+      },
+    });
   }
 
-  public deleteUser(id: UUID) {
-    this.users = this.users.filter((user) => user.id !== id);
+  public async deleteUser(id: UUID): Promise<void> {
+    await this.prisma.user.delete({
+      where: { id },
+    });
   }
 
   // Tracks

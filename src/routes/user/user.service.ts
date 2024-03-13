@@ -12,33 +12,36 @@ import { User, UserResponse } from './entities/user.entity';
 @Injectable()
 export class UserService {
   constructor(private readonly databaseService: DatabaseService) {}
-  create(createUserDto: CreateUserDto): UserResponse {
-    const user = this.databaseService.createUser(createUserDto);
+  async create(createUserDto: CreateUserDto): Promise<UserResponse> {
+    const user = await this.databaseService.createUser(createUserDto);
     return this.createUserResponse(user);
   }
 
-  findAll(): UserResponse[] {
-    const users = this.databaseService.getAllUsers();
+  async findAll(): Promise<UserResponse[]> {
+    const users = await this.databaseService.getAllUsers();
     return users.map((user) => this.createUserResponse(user));
   }
 
-  findOne(id: UUID): UserResponse {
-    const user = this.databaseService.getUserById(id);
+  async findOne(id: UUID): Promise<UserResponse> {
+    const user = await this.databaseService.getUserById(id);
     if (!user) throw new NotFoundException();
     return this.createUserResponse(user);
   }
 
-  update(id: UUID, updatePasswordDto: UpdatePasswordDto): UserResponse {
-    const user = this.databaseService.getUserById(id);
+  async update(
+    id: UUID,
+    updatePasswordDto: UpdatePasswordDto,
+  ): Promise<UserResponse> {
+    const user = await this.databaseService.getUserById(id);
     if (!user) throw new NotFoundException();
-    if (user.password !== updatePasswordDto.oldPassword)
-      throw new ForbiddenException();
-    const updatedUser = this.databaseService.updateUser(id, updatePasswordDto);
+    const { newPassword, oldPassword } = updatePasswordDto;
+    if (user.password !== oldPassword) throw new ForbiddenException();
+    const updatedUser = await this.databaseService.updateUser(id, newPassword);
     return this.createUserResponse(updatedUser);
   }
 
-  remove(id: UUID) {
-    const user = this.databaseService.getUserById(id);
+  async remove(id: UUID) {
+    const user = await this.databaseService.getUserById(id);
     if (!user) throw new NotFoundException();
     this.databaseService.deleteUser(id);
   }
