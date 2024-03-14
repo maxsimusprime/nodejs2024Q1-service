@@ -15,7 +15,6 @@ import { Track } from 'src/routes/track/entities/track.entity';
 import { CreateUserDto } from 'src/routes/user/dto/create-user.dto';
 import { User } from 'src/routes/user/entities/user.entity';
 import { UUID } from 'src/types/general';
-import { v4 as uuidv4 } from 'uuid';
 import { PrismaClient } from '@prisma/client';
 
 @Injectable()
@@ -67,42 +66,53 @@ export class DatabaseService {
   }
 
   // Tracks
-  public getAllTracks() {
-    return this.tracks;
+  public async getAllTracks(): Promise<Track[]> {
+    return await this.prisma.track.findMany();
   }
 
-  public getTrackById(id: UUID) {
-    return this.tracks.find((track) => track.id === id);
+  public async getTrackById(id: UUID): Promise<Track> {
+    return await this.prisma.track.findUnique({
+      where: { id },
+    });
   }
 
-  public createTrack(dto: CreateTrackDto): Track {
+  public async createTrack(dto: CreateTrackDto): Promise<Track> {
     const { name, duration, artistId, albumId } = dto;
-    const track: Track = {
-      id: uuidv4(),
-      name,
-      duration,
-      artistId: artistId || null,
-      albumId: albumId || null,
-    };
-    this.tracks.push(track);
-    return track;
+    return await this.prisma.track.create({
+      data: {
+        name,
+        duration,
+        ...(artistId && {
+          artist: {
+            connect: {
+              id: artistId,
+            },
+          },
+        }),
+        ...(albumId && {
+          album: {
+            connect: {
+              id: albumId,
+            },
+          },
+        }),
+      },
+    });
   }
 
-  public updateTrack(id: UUID, dto: UpdateTrackDto): Track {
-    const track = this.getTrackById(id);
-    const updatedTrack = {
-      ...track,
-      ...dto,
-    };
-    this.tracks = this.tracks.map((track) =>
-      track.id !== id ? track : updatedTrack,
-    );
-    return updatedTrack;
+  public async updateTrack(id: UUID, dto: UpdateTrackDto): Promise<Track> {
+    return await this.prisma.track.update({
+      where: { id },
+      data: {
+        ...dto,
+      },
+    });
   }
 
-  public deleteTrack(id: UUID) {
-    this.tracks = this.tracks.filter((track) => track.id !== id);
-    this.removeTrackFromFavorites(id);
+  public async deleteTrack(id: UUID): Promise<void> {
+    await this.prisma.track.delete({
+      where: { id },
+    });
   }
 
   // Artist
@@ -144,46 +154,46 @@ export class DatabaseService {
   }
 
   //Album
-  public getAllAlbums(): Album[] {
-    return this.albums;
+  public async getAllAlbums(): Promise<Album[]> {
+    return this.prisma.album.findMany();
   }
 
-  public getAlbumById(id: UUID): Album {
-    return this.albums.find((album) => album.id === id);
+  public async getAlbumById(id: UUID): Promise<Album> {
+    return this.prisma.album.findUnique({
+      where: { id },
+    });
   }
 
-  public createAlbum(dto: CreateAlbumDto): Album {
-    const newAlbum: Album = {
-      id: uuidv4(),
-      ...dto,
-    };
-    this.albums.push(newAlbum);
-    return newAlbum;
-  }
-
-  public updateAlbum(id: UUID, dto: UpdateAlbumDto): Album {
-    const album = this.getAlbumById(id);
-    const updatedAlbum = {
-      ...album,
-      ...dto,
-    };
-    this.albums = this.albums.map((album) =>
-      album.id !== id ? album : updatedAlbum,
-    );
-    return updatedAlbum;
-  }
-
-  public deleteAlbum(id: UUID) {
-    this.albums = this.albums.filter((album) => album.id !== id);
-    this.tracks = this.tracks.map((track) =>
-      track.albumId !== id
-        ? track
-        : {
-            ...track,
-            albumId: null,
+  public async createAlbum(dto: CreateAlbumDto): Promise<Album> {
+    const { name, year, artistId } = dto;
+    return this.prisma.album.create({
+      data: {
+        name,
+        year,
+        ...(artistId && {
+          artist: {
+            connect: {
+              id: artistId,
+            },
           },
-    );
-    this.removeAlbumFromFavorites(id);
+        }),
+      },
+    });
+  }
+
+  public async updateAlbum(id: UUID, dto: UpdateAlbumDto): Promise<Album> {
+    return this.prisma.album.update({
+      where: { id },
+      data: {
+        ...dto,
+      },
+    });
+  }
+
+  public async deleteAlbum(id: UUID): Promise<void> {
+    await this.prisma.album.delete({
+      where: { id },
+    });
   }
 
   // Favorites
@@ -191,8 +201,12 @@ export class DatabaseService {
     return {
       // artists: this.favorites.artists.map((id) => this.getArtistById(id)),
       artists: [],
-      albums: this.favorites.albums.map((id) => this.getAlbumById(id)),
-      tracks: this.favorites.tracks.map((id) => this.getTrackById(id)),
+
+      // albums: this.favorites.albums.map((id) => this.getAlbumById(id)),
+      albums: [],
+
+      // tracks: this.favorites.tracks.map((id) => this.getTrackById(id)),
+      tracks: [],
     };
   }
 
