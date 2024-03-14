@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { Artist } from './entities/artist.entity';
@@ -10,7 +14,11 @@ export class ArtistService {
   constructor(private readonly databaseService: DatabaseService) {}
 
   async create(createArtistDto: CreateArtistDto): Promise<Artist> {
-    return await this.databaseService.createArtist(createArtistDto);
+    try {
+      return await this.databaseService.createArtist(createArtistDto);
+    } catch (error) {
+      throw new BadRequestException();
+    }
   }
 
   async findAll(): Promise<Artist[]> {
@@ -25,7 +33,11 @@ export class ArtistService {
 
   async update(id: UUID, updateArtistDto: UpdateArtistDto): Promise<Artist> {
     await this.findOne(id);
-    return await this.databaseService.updateArtist(id, updateArtistDto);
+    try {
+      return await this.databaseService.updateArtist(id, updateArtistDto);
+    } catch {
+      throw new BadRequestException();
+    }
   }
 
   async remove(id: UUID) {

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -12,9 +13,14 @@ import { User, UserResponse } from './entities/user.entity';
 @Injectable()
 export class UserService {
   constructor(private readonly databaseService: DatabaseService) {}
+
   async create(createUserDto: CreateUserDto): Promise<UserResponse> {
-    const user = await this.databaseService.createUser(createUserDto);
-    return this.createUserResponse(user);
+    try {
+      const user = await this.databaseService.createUser(createUserDto);
+      return this.createUserResponse(user);
+    } catch {
+      throw new BadRequestException();
+    }
   }
 
   async findAll(): Promise<UserResponse[]> {
@@ -34,10 +40,19 @@ export class UserService {
   ): Promise<UserResponse> {
     const user = await this.databaseService.getUserById(id);
     if (!user) throw new NotFoundException();
+
     const { newPassword, oldPassword } = updatePasswordDto;
     if (user.password !== oldPassword) throw new ForbiddenException();
-    const updatedUser = await this.databaseService.updateUser(id, newPassword);
-    return this.createUserResponse(updatedUser);
+
+    try {
+      const updatedUser = await this.databaseService.updateUser(
+        id,
+        newPassword,
+      );
+      return this.createUserResponse(updatedUser);
+    } catch {
+      throw new BadRequestException();
+    }
   }
 
   async remove(id: UUID) {
