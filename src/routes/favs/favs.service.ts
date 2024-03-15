@@ -11,52 +11,52 @@ import { UUID } from 'src/types/general';
 export class FavsService {
   constructor(private readonly databaseService: DatabaseService) {}
 
-  findAll(): FavoritesResponse {
-    return this.databaseService.getAllFavorites();
+  async findAll(): Promise<FavoritesResponse> {
+    return await this.databaseService.getAllFavorites();
   }
 
-  addTrack(id: UUID) {
-    const track = this.databaseService.getTrackById(id);
+  async addTrack(id: UUID) {
+    const track = await this.databaseService.getTrackById(id);
     if (!track) throw new UnprocessableEntityException();
-    this.databaseService.addTrackToFavorites(id);
+    await this.databaseService.addTrackToFavorites(id);
     return {
       message: `Track with id ${id} was added to favorites`,
     };
   }
 
-  addAlbum(id: UUID) {
-    const album = this.databaseService.getAlbumById(id);
+  async addAlbum(id: UUID) {
+    const album = await this.databaseService.getAlbumById(id);
     if (!album) throw new UnprocessableEntityException();
-    this.databaseService.addAlbumToFavorites(id);
+    await this.databaseService.addAlbumToFavorites(id);
     return {
       message: `Album with id ${id} was added to favorites`,
     };
   }
 
-  addArtist(id: UUID) {
-    const artist = this.databaseService.getArtistById(id);
+  async addArtist(id: UUID) {
+    const artist = await this.databaseService.getArtistById(id);
     if (!artist) throw new UnprocessableEntityException();
-    this.databaseService.addArtistToFavorites(id);
+    await this.databaseService.addArtistToFavorites(id);
     return {
       message: `Artist with id ${id} was added to favorites`,
     };
   }
 
-  removeTrack(id: UUID) {
-    const track = this.databaseService.getTrackById(id);
+  async removeTrack(id: UUID): Promise<void> {
+    const track = await this.databaseService.getTrackById(id);
     if (!track) throw new NotFoundException();
-    this.databaseService.removeTrackFromFavorites(id);
+    await this.databaseService.removeTrackFromFavorites(id);
   }
 
-  removeAlbum(id: UUID) {
-    const album = this.databaseService.getAlbumById(id);
+  async removeAlbum(id: UUID): Promise<void> {
+    const album = await this.databaseService.getAlbumById(id);
     if (!album) throw new NotFoundException();
-    this.databaseService.removeAlbumFromFavorites(id);
+    await this.databaseService.removeAlbumFromFavorites(id);
   }
 
-  removeArtist(id: UUID) {
-    const artist = this.databaseService.getArtistById(id);
+  async removeArtist(id: UUID): Promise<void> {
+    const artist = await this.databaseService.getArtistById(id);
     if (!artist) throw new NotFoundException();
-    this.databaseService.removeArtistFromFavorites(id);
+    await this.databaseService.removeArtistFromFavorites(id);
   }
 }
