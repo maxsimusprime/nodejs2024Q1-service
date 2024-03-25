@@ -37,12 +37,12 @@
 - To run all tests without authorization
   - install dependencies (in order to get jest)
     ```
-    npm install
+    npm ci
     ```
 
   - make sure app and db containers is running
     ```
-    docker-compose up -d
+    docker-compose up
     ```
 
   - run test by command
