@@ -1,18 +1,52 @@
 version: '3.9'
 
 services:
-
   db:
-    image: postgres
+    build:
+      context: ./docker/postgres/
+      dockerfile: Dockerfile
+    container_name: ${POSTGRES_CONTAINER}
     restart: always
     shm_size: 128mb
     ports:
-      - ${POSTGRESQL_PORT}:${POSTGRESQL_PORT}
+      - ${POSTGRES_PORT}:5432
     environment:
-      POSTGRES_PASSWORD: ${POSTGRESQL_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    networks:
+      - home-library-network
 
-  adminer:
-    image: adminer
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
     restart: always
+    container_name: home-library_app
+    depends_on:
+      - db
+    environment:
+      - PORT=${PORT}
     ports:
-      - ${ADMINER_PORT}:${ADMINER_PORT}
+      - ${PORT}:${PORT}
+    volumes:
+      - .:/usr/src/app
+    networks:
+      - home-library-network
+    env_file:
+      - .env
+    command: npm run start:migrate:dev
+    # npx prisma migrate dev --create-only
+    # npx prisma migrate resolve --applied 0_init
+    # prisma db pull
+
+volumes:
+  postgres:
+    name: postgres_volume
+
+networks:
+  home-library-network:
+    name: home-library-network
+    driver: bridge
