@@ -4,5 +4,8 @@
   "testEnvironment": "node",
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
-  }
+  },
+  "clearMocks": true,
+  "preset": "ts-jest",
+  "setupFilesAfterEnv": ["<rootDir>/prisma/singleton.ts"]
 }

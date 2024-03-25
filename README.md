@@ -18,7 +18,7 @@
 ## Using application
 - Start docker developing server by command inside root directory
   ```
-  docker-compose up
+  docker-compose up -d
   ```
 - In order to send command you can use tools like **Insomnia** or **Postman** ( ⚠️ or you can use http://localhost:4000/doc/ SwaggerUI instead )
 - Just import api.yaml schema in that tools and you can use cozy UI interface
@@ -31,10 +31,14 @@
 
 ## Testing
 - To run all tests without authorization
-
   - install dependencies (in order to get jest)
     ```
     npm install
+    ```
+
+  - make sure app and db containers is running
+    ```
+    docker-compose up -d
     ```
 
   - run test by command

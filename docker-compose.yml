@@ -38,9 +38,6 @@ services:
     env_file:
       - .env
     command: npm run start:migrate:dev
-    # npx prisma migrate dev --create-only
-    # npx prisma migrate resolve --applied 0_init
-    # prisma db pull
 
 volumes:
   postgres:
