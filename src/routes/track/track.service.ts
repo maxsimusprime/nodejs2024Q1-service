@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { DatabaseService } from 'src/database/database.service';
@@ -9,27 +13,35 @@ import { UUID } from 'src/types/general';
 export class TrackService {
   constructor(private readonly databaseService: DatabaseService) {}
 
-  create(createTrackDto: CreateTrackDto) {
-    return this.databaseService.createTrack(createTrackDto);
+  async create(createTrackDto: CreateTrackDto): Promise<Track> {
+    try {
+      return await this.databaseService.createTrack(createTrackDto);
+    } catch {
+      throw new BadRequestException();
+    }
   }
 
-  findAll(): Track[] {
-    return this.databaseService.getAllTracks();
+  async findAll(): Promise<Track[]> {
+    return await this.databaseService.getAllTracks();
   }
 
-  findOne(id: UUID): Track {
-    const track = this.databaseService.getTrackById(id);
+  async findOne(id: UUID): Promise<Track> {
+    const track = await this.databaseService.getTrackById(id);
     if (!track) throw new NotFoundException();
     return track;
   }
 
-  update(id: UUID, updateTrackDto: UpdateTrackDto): Track {
-    this.findOne(id);
-    return this.databaseService.updateTrack(id, updateTrackDto);
+  async update(id: UUID, updateTrackDto: UpdateTrackDto): Promise<Track> {
+    await this.findOne(id);
+    try {
+      return await this.databaseService.updateTrack(id, updateTrackDto);
+    } catch {
+      throw new BadRequestException();
+    }
   }
 
-  remove(id: UUID) {
-    const track = this.findOne(id);
-    if (track) this.databaseService.deleteTrack(id);
+  async remove(id: UUID): Promise<void> {
+    const track = await this.findOne(id);
+    if (track) await this.databaseService.deleteTrack(id);
   }
 }

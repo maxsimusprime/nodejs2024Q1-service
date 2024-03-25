@@ -22,31 +22,31 @@ export class AlbumController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createAlbumDto: CreateAlbumDto): Album {
-    return this.albumService.create(createAlbumDto);
+  async create(@Body() createAlbumDto: CreateAlbumDto): Promise<Album> {
+    return await this.albumService.create(createAlbumDto);
   }
 
   @Get()
-  findAll(): Album[] {
-    return this.albumService.findAll();
+  async findAll(): Promise<Album[]> {
+    return await this.albumService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: UUID): Album {
-    return this.albumService.findOne(id);
+  async findOne(@Param('id', ParseUUIDPipe) id: UUID): Promise<Album> {
+    return await this.albumService.findOne(id);
   }
 
   @Put(':id')
-  update(
+  async update(
     @Param('id', ParseUUIDPipe) id: UUID,
     @Body() updateAlbumDto: UpdateAlbumDto,
-  ): Album {
-    return this.albumService.update(id, updateAlbumDto);
+  ): Promise<Album> {
+    return await this.albumService.update(id, updateAlbumDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id', ParseUUIDPipe) id: UUID) {
-    return this.albumService.remove(id);
+  async remove(@Param('id', ParseUUIDPipe) id: UUID): Promise<void> {
+    return await this.albumService.remove(id);
   }
 }

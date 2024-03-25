@@ -5,241 +5,281 @@ import { Album } from 'src/routes/album/entities/album.entity';
 import { CreateArtistDto } from 'src/routes/artist/dto/create-artist.dto';
 import { UpdateArtistDto } from 'src/routes/artist/dto/update-artist.dto';
 import { Artist } from 'src/routes/artist/entities/artist.entity';
-import {
-  Favorites,
-  FavoritesResponse,
-} from 'src/routes/favs/entities/fav.entity';
+import { FavoritesResponse } from 'src/routes/favs/entities/fav.entity';
 import { CreateTrackDto } from 'src/routes/track/dto/create-track.dto';
 import { UpdateTrackDto } from 'src/routes/track/dto/update-track.dto';
 import { Track } from 'src/routes/track/entities/track.entity';
 import { CreateUserDto } from 'src/routes/user/dto/create-user.dto';
-import { UpdatePasswordDto } from 'src/routes/user/dto/update-password.dto';
 import { User } from 'src/routes/user/entities/user.entity';
 import { UUID } from 'src/types/general';
-import { v4 as uuidv4 } from 'uuid';
+import { PrismaClient } from '@prisma/client';
 
 @Injectable()
 export class DatabaseService {
-  private users: User[] = [];
-  private tracks: Track[] = [];
-  private artists: Artist[] = [];
-  private albums: Album[] = [];
-  private favorites: Favorites = {
-    artists: [],
-    albums: [],
-    tracks: [],
-  };
+  private prisma: PrismaClient = new PrismaClient();
 
   // Users
-  public getAllUsers(): User[] {
-    return this.users;
+  public async getAllUsers(): Promise<User[]> {
+    return await this.prisma.user.findMany();
   }
 
-  public getUserById(id: UUID): User {
-    return this.users.find((user) => user.id === id);
+  public async getUserById(id: UUID): Promise<User> {
+    return await this.prisma.user.findUnique({
+      where: { id },
+    });
   }
 
-  public createUser(dto: CreateUserDto): User {
-    const timeNow = Date.now();
-    const user: User = {
-      ...dto,
-      id: uuidv4(),
-      version: 1,
-      createdAt: timeNow,
-      updatedAt: timeNow,
-    };
-    this.users.push(user);
-    return user;
+  public async createUser(dto: CreateUserDto): Promise<User> {
+    return await this.prisma.user.create({
+      data: {
+        ...dto,
+      },
+    });
   }
 
-  public updateUser(id: UUID, dto: UpdatePasswordDto) {
-    const user = this.users.find((user) => user.id === id);
-    const updatedUser: User = {
-      ...user,
-      version: user.version + 1,
-      password: dto.newPassword,
-      updatedAt: Date.now(),
-    };
-
-    this.users = this.users.map((user) =>
-      user.id !== id ? user : updatedUser,
-    );
-    return updatedUser;
+  public async updateUser(
+    id: UUID,
+    password: string,
+    version: number,
+  ): Promise<User> {
+    return await this.prisma.user.update({
+      where: { id },
+      data: { password, version },
+    });
   }
 
-  public deleteUser(id: UUID) {
-    this.users = this.users.filter((user) => user.id !== id);
+  public async deleteUser(id: UUID): Promise<void> {
+    await this.prisma.user.delete({
+      where: { id },
+    });
   }
 
   // Tracks
-  public getAllTracks() {
-    return this.tracks;
+  public async getAllTracks(): Promise<Track[]> {
+    return await this.prisma.track.findMany();
   }
 
-  public getTrackById(id: UUID) {
-    return this.tracks.find((track) => track.id === id);
+  public async getTrackById(id: UUID): Promise<Track> {
+    return await this.prisma.track.findUnique({
+      where: { id },
+    });
   }
 
-  public createTrack(dto: CreateTrackDto): Track {
+  public async createTrack(dto: CreateTrackDto): Promise<Track> {
     const { name, duration, artistId, albumId } = dto;
-    const track: Track = {
-      id: uuidv4(),
-      name,
-      duration,
-      artistId: artistId || null,
-      albumId: albumId || null,
-    };
-    this.tracks.push(track);
-    return track;
+    return await this.prisma.track.create({
+      data: {
+        name,
+        duration,
+        ...(artistId && {
+          artist: {
+            connect: {
+              id: artistId,
+            },
+          },
+        }),
+        ...(albumId && {
+          album: {
+            connect: {
+              id: albumId,
+            },
+          },
+        }),
+      },
+    });
   }
 
-  public updateTrack(id: UUID, dto: UpdateTrackDto): Track {
-    const track = this.getTrackById(id);
-    const updatedTrack = {
-      ...track,
-      ...dto,
-    };
-    this.tracks = this.tracks.map((track) =>
-      track.id !== id ? track : updatedTrack,
-    );
-    return updatedTrack;
+  public async updateTrack(id: UUID, dto: UpdateTrackDto): Promise<Track> {
+    return await this.prisma.track.update({
+      where: { id },
+      data: {
+        ...dto,
+      },
+    });
   }
 
-  public deleteTrack(id: UUID) {
-    this.tracks = this.tracks.filter((track) => track.id !== id);
-    this.removeTrackFromFavorites(id);
+  public async deleteTrack(id: UUID): Promise<void> {
+    await this.prisma.track.delete({
+      where: { id },
+    });
   }
 
   // Artist
-  public getAllArtists(): Artist[] {
-    return this.artists;
+  public async getAllArtists(): Promise<Artist[]> {
+    return await this.prisma.artist.findMany();
   }
 
-  public getArtistById(id: UUID): Artist {
-    return this.artists.find((artist) => artist.id === id);
+  public async getArtistById(id: UUID): Promise<Artist> {
+    return await this.prisma.artist.findUnique({
+      where: { id },
+    });
   }
 
-  public createArtist(dto: CreateArtistDto): Artist {
-    const artist = {
-      id: uuidv4(),
-      ...dto,
-    };
-    this.artists.push(artist);
-    return artist;
+  public async createArtist(dto: CreateArtistDto): Promise<Artist> {
+    return this.prisma.artist.create({
+      data: {
+        ...dto,
+      },
+    });
   }
 
-  public updateArtist(id: UUID, dto: UpdateArtistDto): Artist {
-    const artist = this.getArtistById(id);
-    const updatedArtist = {
-      ...artist,
-      ...dto,
-    };
-    this.artists = this.artists.map((artist) =>
-      artist.id !== id ? artist : updatedArtist,
-    );
-    return updatedArtist;
+  public async updateArtist(id: UUID, dto: UpdateArtistDto): Promise<Artist> {
+    return this.prisma.artist.update({
+      where: {
+        id,
+      },
+      data: {
+        ...dto,
+      },
+    });
   }
 
-  public deleteArtist(id: UUID) {
-    this.artists = this.artists.filter((artist) => artist.id !== id);
-    this.tracks = this.tracks.map((track) =>
-      track.artistId !== id
-        ? track
-        : {
-            ...track,
-            artistId: null,
-          },
-    );
-    this.albums = this.albums.map((album) =>
-      album.artistId !== id
-        ? album
-        : {
-            ...album,
-            artistId: null,
-          },
-    );
-    this.removeArtistFromFavorites(id);
+  public async deleteArtist(id: UUID): Promise<void> {
+    await this.prisma.artist.delete({
+      where: {
+        id,
+      },
+    });
   }
 
   //Album
-  public getAllAlbums(): Album[] {
-    return this.albums;
+  public async getAllAlbums(): Promise<Album[]> {
+    return this.prisma.album.findMany();
   }
 
-  public getAlbumById(id: UUID): Album {
-    return this.albums.find((album) => album.id === id);
+  public async getAlbumById(id: UUID): Promise<Album> {
+    return this.prisma.album.findUnique({
+      where: { id },
+    });
   }
 
-  public createAlbum(dto: CreateAlbumDto): Album {
-    const newAlbum: Album = {
-      id: uuidv4(),
-      ...dto,
-    };
-    this.albums.push(newAlbum);
-    return newAlbum;
-  }
-
-  public updateAlbum(id: UUID, dto: UpdateAlbumDto): Album {
-    const album = this.getAlbumById(id);
-    const updatedAlbum = {
-      ...album,
-      ...dto,
-    };
-    this.albums = this.albums.map((album) =>
-      album.id !== id ? album : updatedAlbum,
-    );
-    return updatedAlbum;
-  }
-
-  public deleteAlbum(id: UUID) {
-    this.albums = this.albums.filter((album) => album.id !== id);
-    this.tracks = this.tracks.map((track) =>
-      track.albumId !== id
-        ? track
-        : {
-            ...track,
-            albumId: null,
+  public async createAlbum(dto: CreateAlbumDto): Promise<Album> {
+    const { name, year, artistId } = dto;
+    return this.prisma.album.create({
+      data: {
+        name,
+        year,
+        ...(artistId && {
+          artist: {
+            connect: {
+              id: artistId,
+            },
           },
-    );
-    this.removeAlbumFromFavorites(id);
+        }),
+      },
+    });
+  }
+
+  public async updateAlbum(id: UUID, dto: UpdateAlbumDto): Promise<Album> {
+    return this.prisma.album.update({
+      where: { id },
+      data: {
+        ...dto,
+      },
+    });
+  }
+
+  public async deleteAlbum(id: UUID): Promise<void> {
+    await this.prisma.album.delete({
+      where: { id },
+    });
   }
 
   // Favorites
-  public getAllFavorites(): FavoritesResponse {
+  public async getAllFavorites(): Promise<FavoritesResponse> {
+    const favorites = await this.prisma.favorites.findUnique({
+      where: { id: 0 },
+      include: {
+        artists: true,
+        albums: true,
+        tracks: true,
+      },
+    });
     return {
-      artists: this.favorites.artists.map((id) => this.getArtistById(id)),
-      albums: this.favorites.albums.map((id) => this.getAlbumById(id)),
-      tracks: this.favorites.tracks.map((id) => this.getTrackById(id)),
+      artists: favorites?.artists ? [...favorites.artists] : [],
+      albums: favorites?.albums ? [...favorites?.albums] : [],
+      tracks: favorites?.tracks ? [...favorites?.tracks] : [],
     };
   }
 
-  public addTrackToFavorites(id: UUID) {
-    this.favorites.tracks.push(id);
+  public async addTrackToFavorites(id: UUID): Promise<void> {
+    await this.prisma.favorites.upsert({
+      where: { id: 0 },
+      create: {
+        tracks: {
+          connect: { id },
+        },
+      },
+      update: {
+        tracks: {
+          connect: { id },
+        },
+      },
+    });
   }
 
-  public addAlbumToFavorites(id: UUID) {
-    this.favorites.albums.push(id);
+  public async addAlbumToFavorites(id: UUID) {
+    return await this.prisma.favorites.upsert({
+      where: { id: 0 },
+      create: {
+        albums: {
+          connect: { id },
+        },
+      },
+      update: {
+        albums: {
+          connect: { id },
+        },
+      },
+    });
   }
 
-  public addArtistToFavorites(id: UUID) {
-    this.favorites.artists.push(id);
+  public async addArtistToFavorites(id: UUID) {
+    return await this.prisma.favorites.upsert({
+      where: { id: 0 },
+      create: {
+        artists: {
+          connect: { id },
+        },
+      },
+      update: {
+        artists: {
+          connect: { id },
+        },
+      },
+    });
   }
 
-  public removeTrackFromFavorites(id: UUID) {
-    this.favorites.tracks = this.favorites.tracks.filter(
-      (trackId) => trackId !== id,
-    );
+  public async removeTrackFromFavorites(id: UUID) {
+    await this.prisma.favorites.update({
+      where: { id: 0 },
+      data: {
+        tracks: {
+          disconnect: { id },
+        },
+      },
+    });
   }
 
-  public removeAlbumFromFavorites(id: UUID) {
-    this.favorites.albums = this.favorites.albums.filter(
-      (albumId) => albumId !== id,
-    );
+  public async removeAlbumFromFavorites(id: UUID) {
+    await this.prisma.favorites.update({
+      where: { id: 0 },
+      data: {
+        albums: {
+          disconnect: { id },
+        },
+      },
+    });
   }
 
-  public removeArtistFromFavorites(id: UUID) {
-    this.favorites.artists = this.favorites.artists.filter(
-      (artistId) => artistId !== id,
-    );
+  public async removeArtistFromFavorites(id: UUID) {
+    await this.prisma.favorites.update({
+      where: { id: 0 },
+      data: {
+        artists: {
+          disconnect: { id },
+        },
+      },
+    });
   }
 }

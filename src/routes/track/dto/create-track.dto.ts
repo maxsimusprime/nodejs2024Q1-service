@@ -1,20 +1,17 @@
-import { IsNumber, IsString, IsUUID } from 'class-validator';
-import { PartialType } from '@nestjs/mapped-types';
+import { IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
 
-class UnnecessaryFields {
-  @IsUUID()
-  readonly albumId?: string | null;
-
-  @IsUUID()
-  readonly artistId: string | null;
-}
-
-class UnnecessaryDto extends PartialType(UnnecessaryFields) {}
-
-export class CreateTrackDto extends UnnecessaryDto {
+export class CreateTrackDto {
   @IsString()
   readonly name: string;
 
   @IsNumber()
   readonly duration: number;
+
+  @IsOptional()
+  @IsUUID()
+  readonly albumId?: string | null;
+
+  @IsOptional()
+  @IsUUID()
+  readonly artistId?: string | null;
 }

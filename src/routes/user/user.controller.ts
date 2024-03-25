@@ -22,31 +22,31 @@ export class UserController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createUserDto: CreateUserDto): UserResponse {
-    return this.userService.create(createUserDto);
+  async create(@Body() createUserDto: CreateUserDto): Promise<UserResponse> {
+    return await this.userService.create(createUserDto);
   }
 
   @Get()
-  findAll(): UserResponse[] {
-    return this.userService.findAll();
+  async findAll(): Promise<UserResponse[]> {
+    return await this.userService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: UUID): UserResponse {
-    return this.userService.findOne(id);
+  async findOne(@Param('id', ParseUUIDPipe) id: UUID): Promise<UserResponse> {
+    return await this.userService.findOne(id);
   }
 
   @Put(':id')
-  update(
+  async update(
     @Param('id', ParseUUIDPipe) id: UUID,
     @Body() updatePasswordDto: UpdatePasswordDto,
-  ): UserResponse {
-    return this.userService.update(id, updatePasswordDto);
+  ): Promise<UserResponse> {
+    return await this.userService.update(id, updatePasswordDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id', ParseUUIDPipe) id: UUID) {
-    return this.userService.remove(id);
+  async remove(@Param('id', ParseUUIDPipe) id: UUID): Promise<void> {
+    return await this.userService.remove(id);
   }
 }
