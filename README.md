@@ -47,3 +47,10 @@
 https://hub.docker.com/r/maxsin/home-library/tags
 - TAG **dev** - for develop version:
 - TAG **prod** - for production version:
+
+
+## Images vulnerability scanning
+- run command
+  ```
+  npm run scan
+  ```
