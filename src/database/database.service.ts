@@ -5,10 +5,7 @@ import { Album } from 'src/routes/album/entities/album.entity';
 import { CreateArtistDto } from 'src/routes/artist/dto/create-artist.dto';
 import { UpdateArtistDto } from 'src/routes/artist/dto/update-artist.dto';
 import { Artist } from 'src/routes/artist/entities/artist.entity';
-import {
-  Favorites,
-  FavoritesResponse,
-} from 'src/routes/favs/entities/fav.entity';
+import { FavoritesResponse } from 'src/routes/favs/entities/fav.entity';
 import { CreateTrackDto } from 'src/routes/track/dto/create-track.dto';
 import { UpdateTrackDto } from 'src/routes/track/dto/update-track.dto';
 import { Track } from 'src/routes/track/entities/track.entity';
@@ -19,16 +16,6 @@ import { PrismaClient } from '@prisma/client';
 
 @Injectable()
 export class DatabaseService {
-  private users: User[] = [];
-  private tracks: Track[] = [];
-  private artists: Artist[] = [];
-  private albums: Album[] = [];
-  private favorites: Favorites = {
-    artists: [],
-    albums: [],
-    tracks: [],
-  };
-
   private prisma: PrismaClient = new PrismaClient();
 
   // Users
@@ -50,12 +37,14 @@ export class DatabaseService {
     });
   }
 
-  public async updateUser(id: UUID, password: string): Promise<User> {
+  public async updateUser(
+    id: UUID,
+    password: string,
+    version: number,
+  ): Promise<User> {
     return await this.prisma.user.update({
       where: { id },
-      data: {
-        password,
-      },
+      data: { password, version },
     });
   }
 
