@@ -45,9 +45,11 @@ export class UserService {
     if (user.password !== oldPassword) throw new ForbiddenException();
 
     try {
+      const { version } = user;
       const updatedUser = await this.databaseService.updateUser(
         id,
         newPassword,
+        version + 1,
       );
       return this.createUserResponse(updatedUser);
     } catch {
@@ -62,8 +64,13 @@ export class UserService {
   }
 
   private createUserResponse(user: User): UserResponse {
-    const userResponse = { ...user };
-    delete userResponse['password'];
-    return userResponse;
+    const { id, login, version, createdAt, updatedAt } = user;
+    return {
+      id,
+      login,
+      version,
+      createdAt: createdAt.valueOf(),
+      updatedAt: updatedAt.valueOf(),
+    };
   }
 }
